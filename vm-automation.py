@@ -17,6 +17,7 @@ vm_guest_password = 'P@ssw0rd'
 remote_folder = 'C:\\Users\\user\\Desktop\\'
 vm_delay = 30
 vm_start_timeout = 20
+vboxmanage_timeout = 60
 
 # Logging options
 logger = logging.getLogger('vm-automation')
@@ -40,7 +41,7 @@ else:
 # Wrapper for vboxmanage command
 def vboxmanage(args):
     try:
-        cmd = subprocess.run(vboxmanage_path + args, capture_output=True, text=True)
+        cmd = subprocess.run(vboxmanage_path + args, capture_output=True, timeout=vboxmanage_timeout, text=True)
         return cmd.returncode, cmd.stdout, cmd.stderr
     except FileNotFoundError:
         logging.error('Unable to start vboxmanage. Exiting.')

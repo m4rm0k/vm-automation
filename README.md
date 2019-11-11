@@ -16,6 +16,7 @@ Note. If snapshot does not exist on specific VM it will be skipped.
 * remote_folder - directory, where executable is uploaded (on guest host). Example: 'C:\\\\Users\\\\user\\\\Desktop\\\\'
 * vm_delay - Execution timeout in seconds. Example: 30
 * vm_start_timeout - VM start timeout in seconds. Example: 20
+* vboxmanage_timeout - global timeout for all vboxmanage commands. Example: 60
 
 # Usage:
 vm-automation.py binary.exe
