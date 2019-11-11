@@ -22,7 +22,7 @@ vm-automation.py binary.exe
 
 # TODO:
 * Run multiple VMs in parallel
-* Optionally disable network on guest host
+* Optionally disable network for guest
 * Optional commands to run before/after analysis
 
 # Example video:
