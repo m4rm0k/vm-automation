@@ -21,9 +21,13 @@ Note. If snapshot does not exist on specific VM it will be skipped.
 vm-automation.py binary.exe
 
 # TODO:
-Run multiple VMs in parallel
+* Run multiple VMs in parallel
+* Optionally disable network on guest host
+* Optional commands to run before/after analysis
 
 # Example video:
+* Version 0.1 on Windows host:
+
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=IMrZaJPqVlA" target="_blank"><img src="http://img.youtube.com/vi/IMrZaJPqVlA/0.jpg" width="240" height="180" border="10" /></a>
 
 # Example output:
