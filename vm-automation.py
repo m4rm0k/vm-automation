@@ -26,7 +26,7 @@ logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s', level=logg
 # Check for command line args and file
 args = ''.join(sys.argv[1:])
 if args in ['-h', '--help', '/?'] or not args:
-    print(f'Usage: {args[0]} path_to_file')
+    print(f'Usage: {args} path_to_file')
     exit()
 elif os.path.isfile(args):
     local_file = args
