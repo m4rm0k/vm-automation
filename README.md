@@ -28,6 +28,7 @@ python vm-automation.py binary.exe
 # Changelog
 Version 0.3.1:
 * Optionally calculate sha256 hash of file and show links to VirusTotal and Google searches
+* Fix some warnings
 
 Version 0.3:
 * Added option to enable/disable network on guest
