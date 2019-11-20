@@ -23,7 +23,7 @@ vm_guest_password = 'P@ssw0rd'
 # Where to put test file
 remote_folder = 'C:\\Users\\user\\Desktop\\'
 # 'on' to enable; 'off' to disable; anything else to keep original network state
-vm_network_state = 'off'
+vm_network_state = 'keep'
 # Guest screen resolution ('Width Height Depth')
 vm_guest_resolution = '1024 768 32'
 # Script/applications to run before and after main file execution
@@ -227,10 +227,10 @@ def main_routine(vm_name, snapshots_list):
         # Set guest network state
         if vm_network_state == 'on':
             logging.debug(f'{vm_name}({snapshot_name}): Enabling network for guest')
-            result = vm_network(vm_name, snapshot_name, 'on')
+            vm_network(vm_name, snapshot_name, 'on')
         elif vm_network_state == 'off':
             logging.debug(f'{vm_name}({snapshot_name}): Disabling network for guest')
-            result = vm_network(vm_name, snapshot_name, 'off')
+            vm_network(vm_name, snapshot_name, 'off')
         else:
             logging.debug(f'{vm_name}({snapshot_name}): Keeping original network state')
 
