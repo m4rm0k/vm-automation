@@ -8,26 +8,34 @@ import sys
 import threading
 import time
 
-# Options
+# =================== Options ===================
+# List of VMs and snapshots to use
 vms_list = ['w10_1903_x64', 'w10_1903_x86']
 snapshots_list = ['live']
+# Path to 'vboxmanage' executable
 vboxmanage_path = 'vboxmanage'
-vm_gui = 'gui'  # 'gui' or 'headless'
+# 'gui' or 'headless'
+vm_gui = 'gui'
+# Login and password for guest OS
 vm_guest_username = 'user'
 vm_guest_password = 'P@ssw0rd'
+# Where to put test file
 remote_folder = 'C:\\Users\\user\\Desktop\\'
+# 'on' to enable; 'off' to disable; anything else to keep original network state
+vm_network_state = 'off'
 # Guest screen resolution ('Width Height Depth')
 vm_guest_resolution = '1024 768 32'
 # Script/applications to run before and after main file execution
-# Specify full name for applications ('notepad.exe', not 'notepad')
-preexec = 'calc.exe'
-postexec = 'cmd.exe'
-# Global timeout
+# Specify full name for applications ('calc.exe', not 'calc')
+preexec = ''
+postexec = ''
+# Timeout both for commands and VM
 timeout = 60
-
 # Logging options
+logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s', level=logging.INFO)
+# ===============================================
+
 logger = logging.getLogger('vm-automation')
-logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s', level=logging.DEBUG)
 
 # Check for command line args and file
 args = ''.join(sys.argv[1:])
@@ -99,18 +107,31 @@ def vm_restore(vm_name, snapshot_name):
         logging.error(f'{vm_name}({snapshot_name}): Error while restoring snapshot. Code: {result[0]}')
 
 
-# Enable/disable guest network
-def vm_network(vm_name, snapshot_name, network_status):
-    logging.info(f'{vm_name}({snapshot_name}): Setting network parameters')
+# Change network link state
+def vm_network(vm_name, snapshot_name, link_state):
+    if link_state not in ['on', 'off']:
+        logging.error(f'{vm_name}({snapshot_name}): link_state should be "on" or "off"')
+        exit()
+    logging.info(f'{vm_name}({snapshot_name}): Setting network parameters to {link_state}')
+    result = vboxmanage(f'controlvm {vm_name} setlinkstate1 off')
+    if result[0] == 0:
+        logging.debug(f'{vm_name}({snapshot_name}): NIC state changed')
+    else:
+        logging.error(f'{vm_name}({snapshot_name}): Unable to change NIC state. Code: {result[0]}')
 
 
 # Control screen resolution
-def vm_screen(vm_name, snapshot_name, screen_resolution):
-    logging.info(f'{vm_name}({snapshot_name}): Changing screen resolution')
+def vm_setres(vm_name, snapshot_name, screen_resolution):
+    logging.info(f'{vm_name}({snapshot_name}): Changing screen resolution for VM')
+    result = vboxmanage(f'controlvm {vm_name} setvideomodehint {screen_resolution}')
+    if result[0] == 0:
+        logging.debug(f'{vm_name}({snapshot_name}): Screen resolution changed')
+    else:
+        logging.error(f'{vm_name}({snapshot_name}): Unable to change screen resolution. Code: {result[0]}')
 
 
 # Execute file/command on VM
-def vm_start_on_vm(vm_name, snapshot_name, vm_guest_username, vm_guest_password, remote_file):
+def vm_exec(vm_name, snapshot_name, vm_guest_username, vm_guest_password, remote_file):
     logging.info(f'{vm_name}({snapshot_name}): Executing file {remote_file}')
     _ = 0
     while _ < timeout:
@@ -166,7 +187,7 @@ def vm_screenshot(vm_name, snapshot_name, image_id=1):
     if result[0] == 0:
         logging.debug(f'{vm_name}({snapshot_name}): Screenshot created')
     else:
-        logging.debug(f'{vm_name}({snapshot_name}): Unable to take screenshot')
+        logging.error(f'{vm_name}({snapshot_name}): Unable to take screenshot')
     image_id += 1
     return image_id
 
@@ -175,31 +196,62 @@ def vm_screenshot(vm_name, snapshot_name, image_id=1):
 def main_routine(vm_name, snapshots_list):
     for snapshot_name in snapshots_list:
         logging.info(f'{vm_name}({snapshot_name}): Task started')
+
+        # Stop VM, if already running, restore snapshot and start VM
         vm_stop(vm_name, snapshot_name)
         vm_restore(vm_name, snapshot_name)
         vm_start(vm_name, snapshot_name)
+        time.sleep(3)  # Just to make sure VM is alive
 
-        if 'local_file_extension' not in locals():
-            # Assuming '.exe' if no extension extracted from name
-            local_file_extension = '.exe'
+        # Set guest resolution
+        if vm_guest_resolution:
+            vm_setres(vm_name, snapshot_name, vm_guest_resolution)
+        else:
+            logging.debug(f'{vm_name}({snapshot_name}): vm_guest_resolution not set')
+
+        # Set guest network state
+        if vm_network_state == 'on':
+            logging.debug(f'{vm_name}({snapshot_name}): Enabling network for guest')
+            vm_network(vm_name, snapshot_name, 'on')
+        elif vm_network_state == 'off':
+            logging.debug(f'{vm_name}({snapshot_name}): Disabling network for guest')
+            vm_network(vm_name, snapshot_name, 'off')
+        else:
+            logging.debug(f'{vm_name}({snapshot_name}): Keeping original network state')
+
+
+        # Generate random file name
+        if local_file_extension:
+            logging.debug(f'{vm_name}({snapshot_name}): Extension obtained from original file')
+            file_extension = local_file_extension
+        else:
+            logging.debug(f'{vm_name}({snapshot_name}): Unable to obtain file extension. Assuming *.exe')
+            file_extension = '.exe'
         random_name = ''.join(random.choice(string.ascii_letters) for x in range(random.randint(4, 20)))
-        remote_file = remote_folder + random_name + ''.join(local_file_extension)
+        remote_file = remote_folder + random_name + ''.join(file_extension)
 
-        if preexec in locals():
-            vm_start_on_vm(vm_name, snapshot_name, vm_guest_username, vm_guest_password, preexec)
-        exit()
+        # Run preexec script
+        if preexec:
+            vm_exec(vm_name, snapshot_name, vm_guest_username, vm_guest_password, preexec)
+        else:
+            logging.debug(f'{vm_name}({snapshot_name}): preexec not set')
 
+        # Upload file to VM, take screenshot, start file, take screenshot, wait for {timeout} seconds, take screenshot
         vm_copyto(vm_name, snapshot_name, vm_guest_username, vm_guest_password, local_file, remote_file)
         screenshot = vm_screenshot(vm_name, snapshot_name)
-        vm_start_on_vm(vm_name, snapshot_name, vm_guest_username, vm_guest_password, remote_file)
-        time.sleep(5)
+        vm_exec(vm_name, snapshot_name, vm_guest_username, vm_guest_password, remote_file)
+        time.sleep(3)
         screenshot = vm_screenshot(vm_name, snapshot_name, screenshot)
         time.sleep(timeout)
         screenshot = vm_screenshot(vm_name, snapshot_name, screenshot)
 
-        if postexec in locals():
-            vm_start_on_vm(vm_name, snapshot_name, vm_guest_username, vm_guest_password, postexec)
+        # Run postexec script
+        if postexec:
+            vm_exec(vm_name, snapshot_name, vm_guest_username, vm_guest_password, postexec)
+        else:
+            logging.debug(f'{vm_name}({snapshot_name}): postexec not set')
 
+        # Stop VM, restore snapshot
         vm_stop(vm_name, snapshot_name)
         vm_restore(vm_name, snapshot_name)
         logging.info(f'{vm_name}({snapshot_name}): Task finished')
@@ -216,4 +268,4 @@ time.sleep(1)
 for vm_name in vms_list:
     t = threading.Thread(target=main_routine, args=(vm_name, snapshots_list))
     t.start()
-    time.sleep(3)
+    time.sleep(3)  # Delay before starting next VM
