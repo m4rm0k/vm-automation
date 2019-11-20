@@ -16,6 +16,8 @@ Both Windows and Linux are supported as host OS.
 * preexec - application or script to run before main file. Example: preexec = 'notepad.exe'
 * postexec - application or script to run after main file. Example: postexec = 'notepad.exe'
 * timeout - global timeout for all vboxmanage commands (seconds). Example: 60
+* calculate_hash - calculate sha256 hash of file. Example: calculate_hash = 1
+* show_links - show links for VirusTotal and Google search. Example: show_links = 1
 
 # Usage
 python vm-automation.py binary.exe
@@ -24,6 +26,10 @@ python vm-automation.py binary.exe
 * Control how many threads run simultaneously (currently equals to number of VMs)
 
 # Changelog
+Version 0.3.1:
+* Optionally calculate sha256 hash of file and show links to VirusTotal and Google searches
+* Fix some warnings
+
 Version 0.3:
 * Added option to enable/disable network on guest
 * Added option to start scripts before/after running main file
