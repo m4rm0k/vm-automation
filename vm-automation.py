@@ -36,10 +36,10 @@ postexec = ''
 timeout = 60
 # Calculate hash of input file
 calculate_hash = 1
-# Show search links to VirusTotal and Google
+# Show search links to VirusTotal and Google. This will enable 'calculate_hash' too, if not set
 show_links = 1
 # Logging options
-logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s', level=logging.DEBUG)
+logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s', level=logging.INFO)
 # ===============================================
 
 logger = logging.getLogger('vm-automation')
@@ -280,7 +280,7 @@ logging.info(f'VirtualBox version: {vm_version()}; Script version: 0.3.1\n')
 logging.info(f'VMs: {vms_list}')
 logging.info(f'Snapshots: {snapshots_list}\n')
 logging.info(f'File: "{local_file}"')
-if calculate_hash:
+if calculate_hash or show_links:
     file_hash = hashlib.sha256()
     block_size = 65536
     with open(local_file, 'rb') as f:
