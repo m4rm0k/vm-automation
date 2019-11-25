@@ -26,9 +26,10 @@ python vm-automation.py binary.exe
 * Control how many threads run simultaneously (currently equals to number of VMs)
 
 # Changelog
-Version 0.3.1:
+Version 0.3.1-0.3.2:
 * Optionally calculate sha256 hash of file and show links to VirusTotal and Google searches
 * Fix some warnings
+* Small fixes
 
 Version 0.3:
 * Added option to enable/disable network on guest
