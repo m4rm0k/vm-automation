@@ -29,9 +29,9 @@ vm_guest_resolution = '1024 768 32'
 # Script/applications to run before and after main file execution
 # Specify full name for applications ('calc.exe', not 'calc')
 preexec = ''
-# preexec = 'C:\\SysinternalsSuite\\Procmon.exe /AcceptEula /Minimized /Quiet /LoadConfig config'
+# preexec = 'C:\\preexec.cmd'
 postexec = ''
-# postexec = 'C:\\SysinternalsSuite\\Procmon.exe /Terminate'
+# postexec = 'C:\\postexec.cmd'
 # Timeout both for commands and VM
 timeout = 60
 # Calculate hash of input file
@@ -39,7 +39,7 @@ calculate_hash = 1
 # Show search links to VirusTotal and Google. This will enable 'calculate_hash' too, if not set
 show_links = 1
 # Logging options
-logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s', level=logging.INFO)
+logging.basicConfig(format='%(asctime)s [%(levelname)s] %(message)s', level=logging.DEBUG)
 # ===============================================
 
 logger = logging.getLogger('vm-automation')
@@ -250,17 +250,17 @@ def main_routine(vm_name, snapshots_list):
         else:
             logging.debug(f'{vm_name}({snapshot_name}): preexec not set')
 
-        # Upload file to VM; take screenshot; start file; take screenshot; sleep 5 seconds; take screenshot;
-        # wait for {timeout - 10} seconds, take screenshot
+        # Upload file to VM; take screenshot; start file; take screenshot; sleep 2 seconds; take screenshot;
+        # wait for {timeout/2} seconds; take screenshot; wait for {timeout/2} seconds; take screenshot
         vm_copyto(vm_name, snapshot_name, vm_guest_username, vm_guest_password, local_file, remote_file)
         screenshot = vm_screenshot(vm_name, snapshot_name)
         vm_exec(vm_name, snapshot_name, vm_guest_username, vm_guest_password, remote_file)
-        screenshot = vm_screenshot(vm_name, snapshot_name)
-        time.sleep(5)
         screenshot = vm_screenshot(vm_name, snapshot_name, screenshot)
-        time.sleep(5)
+        time.sleep(2)
         screenshot = vm_screenshot(vm_name, snapshot_name, screenshot)
-        time.sleep(timeout - 10)
+        time.sleep(timeout / 2)
+        screenshot = vm_screenshot(vm_name, snapshot_name, screenshot)
+        time.sleep(timeout / 2)
         screenshot = vm_screenshot(vm_name, snapshot_name, screenshot)
 
         # Run postexec script
@@ -276,7 +276,7 @@ def main_routine(vm_name, snapshots_list):
 
 
 # Show general info
-logging.info(f'VirtualBox version: {vm_version()}; Script version: 0.3.1\n')
+logging.info(f'VirtualBox version: {vm_version()}; Script version: 0.3.2\n')
 logging.info(f'VMs: {vms_list}')
 logging.info(f'Snapshots: {snapshots_list}\n')
 logging.info(f'File: "{local_file}"')
