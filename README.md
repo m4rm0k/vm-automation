@@ -1,3 +1,19 @@
+#What is VM VirtualBox?
+
+VirtualBox is a platform for visualization applications and is a hosted hypervisor for x86 virtualization. It is developed by Oracle Corporation. It can run multiple operating systems simultaneously and is quite easy to install. Using this, the user can install and run as many virtual machines as he likes.
+
+Features – 
+
+This software runs on a large number of the 64-bit host OS.
+
+It provides pretty good hardware support.
+
+It gives a group feature for users to organize and control virtual machines altogether and individually also.
+
+It’s a modular design with a well-structured programming interface.
+
+The (VirtualBox Remote Desktop Extension) enables high-performance remote access.
+
 # vm-automation
 Python script that can be used to test software/scripts/etc on VMs (currently only VirtualBox is supported).
 
